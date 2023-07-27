@@ -1,67 +1,45 @@
-import { useRef, useState } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { useLoader } from "@react-three/fiber";
-import { Suspense } from "react";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { Suspense, useContext } from "react";
+import { Controls, useControl } from 'react-three-gui';
+import React, { useState } from 'react';
 
-
-function Box(props) {
-  // This reference gives us direct access to the THREE.Mesh object
-  const ref = useRef()
-  // Hold state for hovered and clicked events
-  const [hovered, hover] = useState(false)
-  const [clicked, click] = useState(false)
-  // Subscribe this component to the render-loop, rotate the mesh every frame
-  useFrame((state, delta) => (ref.current.rotation.x += delta))
-  // Return the view, these are regular Threejs elements expressed in JSX
-  return (
-    <mesh
-      {...props}
-      ref={ref}
-      scale={clicked ? 1.5 : 1}
-      onClick={(event) => click(!clicked)}
-      onPointerOver={(event) => (event.stopPropagation(), hover(true))}
-      onPointerOut={(event) => hover(false)}>
-      <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color={hovered ? 'blue' : 'red'} />
-      
-    </mesh>
-  )
-}
-
-const Model1 = () => {
-  const gltf = useLoader(GLTFLoader, "./Poimandres.glb");
-  return (
-    <>
-      <primitive object={gltf.scene} scale={0.4} />
-      <meshStandardMaterial color={ 'red'} />
-    </>
-  );
-};
-
-const Model2 = () => {
-  const gltf = useLoader(GLTFLoader, "./Upperglb.glb");
-  return (
-    <>
-      <primitive object={gltf.scene} position={[0,-1,0]} scale={0.4} />
-      <meshStandardMaterial color={ 'red'} />
-    </>
-  );
-};
+// MY Apps
+import Model2 from "./components/Model2Display.jsx";
+import Model1 from "./components/Model1Display.jsx";
+import SideBar from './components/GuiControl.jsx';
+import { GlobalContext } from './Services/GlobalContext.js';
 
 export default function App() {
+  // const [globalValue, setGlobalValue] = useState(0); // Global değişken
+  const { setGlobalValue} = useContext(GlobalContext)
+  const updateGlobalValue = (value) => {
+    // Değerleri -2 ve 2 arasında eşitleyin (mapRange fonksiyonu gerekli)
+    const mappedValue = mapRange(value, 0, 500, -2, 0.254);
+    setGlobalValue(mappedValue);
+    console.log(value);
+  };
+  const mapRange = (value, inMin, inMax, outMin, outMax) => {
+    return ((value - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+  };
+  
   return (
-    <Canvas style={{height:"100%"}}>
-      <Suspense>
-        <Model1 />
-        <Model2 />
-        <ambientLight intensity={0.5} />
-        <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
-        <pointLight position={[-10, -10, -10]} />
-        
-        <OrbitControls />
-      </Suspense>
-    </Canvas>
+    <div className='d-flex' style={{height:"100%"}}>
+      <SideBar onChange={updateGlobalValue}/>
+      <Canvas>
+        <Suspense fallback={null}>
+          <Model1 />
+          <Model2 />
+          <ambientLight intensity={0.5} />
+          <pointLight position={[5, 0, 0]} />
+          <pointLight position={[-5, 0, 0]} />
+          <pointLight position={[0, 0, 10]} />
+          <pointLight position={[0, 0, -10]} />
+          <pointLight position={[0, 10, 0]} />
+          <pointLight position={[0, -10, 0]} />
+          <OrbitControls />
+        </Suspense>
+      </Canvas>
+    </div>
   )
 }

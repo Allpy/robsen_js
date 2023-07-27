@@ -68,3 +68,11 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+TODO:
+
+# MQTT haberleşmesi ile uzaktan erişim kullan ve position değer yönetimini uygula
+# cm-mm-m dönüşşümleri ile pozisyonlama değerlerini daha stabil hale getir
+# gui desing ve kontrolleri biraz daha uygun hale getir
+# cismin scale yönetimini ve start verdiğinde ki pozisyon değerini düzenle
