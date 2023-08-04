@@ -1,50 +1,61 @@
-import React, { useState } from "react";
-
-function MeshAdd() {
-  const [selectedFile, setSelectedFile] = useState(null);
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file);
+import axios from 'axios';
+import React, { Component } from 'react';
+class MeshAdd extends Component {
+  state = {
+    selectedFile: null,
   };
 
-  const handleAddButtonClick = () => {
-    if (selectedFile) {
-      const formData = new FormData();
-      formData.append("myFile", selectedFile);
+  onFileChange = (event) => {
+    this.setState({ selectedFile: event.target.files[0] });
+  };
 
-      fetch("/api/uploadfile", {
-        method: "POST",
-        body: formData,
-      })
-        .then((response) => {
-          if (response.ok) {
-            console.log("File uploaded successfully!");
-            // Perform any other actions you want after successful file upload
-          } else {
-            console.error("File upload failed!");
-            // Handle error case if needed
-          }
-        })
-        .catch((error) => {
-          console.error("Error during file upload:", error);
-          // Handle error case if needed
-        });
+  onFileUpload = () => {
+    const formData = new FormData();
+    formData.append(
+      'myFile',
+      this.state.selectedFile,
+      this.state.selectedFile.name
+    );
+
+    console.log(this.state.selectedFile);
+    axios.post('api/uploadfile', formData);  //I need to change this line
+  };
+
+  fileData = () => {
+    if (this.state.selectedFile) {
+      return (
+        <div>
+          <h2>File Details:</h2>
+          <p>File Name: {this.state.selectedFile.name}</p>
+          <p>File Type: {this.state.selectedFile.type}</p>
+          <p>
+            Last Modified:{' '}
+            {this.state.selectedFile.lastModifiedDate.toDateString()}
+          </p>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <br />
+          <h4>Choose before Pressing the Upload button</h4>
+        </div>
+      );
     }
   };
 
-  return (
-    <div>
-      <input
-        type="file"
-        className="form-control mb-3"
-        onChange={handleFileChange}
-      />
-      <button className="btn btn-primary" onClick={handleAddButtonClick}>
-        Add
-      </button>
-    </div>
-  );
+  render() {
+    return (
+      <div>
+        <h1>Plese select the translation file</h1>
+        <div>
+          <input type="file" onChange={this.onFileChange} />
+          <button onClick={this.onFileUpload}>Upload!</button>
+        </div>
+        {this.fileData()}
+      </div>
+    );
+  }
 }
 
 export default MeshAdd;

@@ -1,29 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { useContext } from "react";
+import React, { useState } from "react";
 import MeshAdd from "./Gui_Components/MeshAdd";
 import MeshConfiguration from "./Gui_Components/MeshConfigrutaion";
-import { GlobalContext } from "../Services/GlobalContext";
+import FileList from "./FileList";
 
-function SideBar() {
+function SideBar({ selectedFiles, selectedIndex, updateSelectedFiles, handleRangeChange, rangeValue }) {
   const [activeTab, setActiveTab] = useState("Add");
-  const { globalValue, setGlobalValue } = useContext(GlobalContext);
-  const [localGlobalValue, setLocalGlobalValue] = useState(globalValue);
 
   const handleTabClick = (tabName) => {
     setActiveTab(tabName);
   };
-
-  // Define a function to handle the value change from MeshConfiguration
-  const handleConfigurationChange = (value) => {
-    // You can add any additional logic here if needed
-    setLocalGlobalValue(value);
-  };
-
-  // Use useEffect to update the globalValue in the GlobalContext when localGlobalValue changes
-  useEffect(() => {
-    setGlobalValue(localGlobalValue);
-    // The second parameter [] ensures this effect runs only once after initial render
-  }, [localGlobalValue, setGlobalValue]);
 
   return (
     <div className="Sidebar bg-secondary px-5 py-5" style={{ width: "30%", height: "100%", left: 0 }}>
@@ -40,10 +25,19 @@ function SideBar() {
         >
           Configuration
         </button>
+        <button
+          className={`nav-link ${activeTab === "FileList" ? "active text-black" : "text-white"}`}
+          onClick={() => handleTabClick("FileList")}
+        >
+          FileList
+        </button>
       </nav>
       <div className="tab-content">
         {activeTab === "Add" && <MeshAdd />}
-        {activeTab === "Configuration" && <MeshConfiguration onChange={handleConfigurationChange} />}
+        {activeTab === "Configuration" && <MeshConfiguration onChange={handleRangeChange} rangeValue={rangeValue} />}
+        {activeTab === "FileList" && (
+          <FileList selectedFiles={selectedFiles} selectedIndex={selectedIndex} sendData={updateSelectedFiles} />
+        )}
       </div>
     </div>
   );
