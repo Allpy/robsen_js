@@ -3,36 +3,47 @@ import React, { useState, useRef, useContext } from 'react';
 import Select from 'react-select';
 
 //My Context
-import { usePositionContext } from '../../Services/PositionContext';
-import { MeshContext } from '../../Services/MeshContext';
 import { useAllMeshDataContext } from '../../Services/AllMeshDataContext';
 
 
 const MyComponent = (props) => {
+
+  //Slider Position RangeInput Values
   const [temporaryXRangeValue, setTemporaryXRangeValue] = useState(0);
   const [temporaryYRangeValue, setTemporaryYRangeValue] = useState(0);
   const [temporaryZRangeValue, setTemporaryZRangeValue] = useState(0);
-
+  
+  
+  //Slider Rotation RangeInput Values
   const [temporaryXRotationValue, setTemporaryXRotationValue] = useState(0);
   const [temporaryYRotationValue, setTemporaryYRotationValue] = useState(0);
   const [temporaryZRotationValue, setTemporaryZRotationValue] = useState(0);
 
-  const { positionData, updatePositionData } = usePositionContext();
-  const {selectedMeshName,setSelectedMeshName} = useState();
-  const { allMeshData, setAllMeshData, selectedFiles, setSelectedFiles } = useAllMeshDataContext();
-  const [selectedMeshData, setSelectedMeshData] = useState(null);
 
+  //MeshData Values
+  const {selectedMeshName,setSelectedMeshName} = useState();
+  const [activeMeshData,setActiveMeshData] = useState(null);
+  const [globalMeshDataIndex,setglobalMeshDataIndex] = useState(null);
+  
+  //MeshData Context
+  const { allMeshData, setAllMeshData, selectedFiles, setSelectedFiles } = useAllMeshDataContext();
+ 
+  
 
   const numberXInputRef = useRef(null);
   const numberYInputRef = useRef(null);
-  const numberZInputRef = useRef(null);
-
-  //Seçilen dosyaların konfigrasyonu için ikinci seçim alanına getirilmesi
-  
-  
+  const numberZInputRef = useRef(null);  
   
   const handleXSliderChange = (e) => {
     setTemporaryXRangeValue(e.target.value);
+    if (activeMeshData) {
+      const updatedMeshData = {
+        ...activeMeshData, // Önceki veriyi kopyala
+        x: temporaryXRangeValue,
+      };
+  
+      setActiveMeshData(updatedMeshData); // Kopyalanan veriyi güncelle
+    }
   };
 
   const handleYSliderChange = (e) => {
@@ -81,9 +92,9 @@ const MyComponent = (props) => {
   
 
   const handleUpdateButtonClick = () => {
-    if (selectedMeshData) {
+    if (activeMeshData) {
       const updatedMeshData = {
-        ...selectedMeshData,
+        ...activeMeshData, // Önceki veriyi kopyala
         x: temporaryXRangeValue,
         y: temporaryYRangeValue,
         z: temporaryZRangeValue,
@@ -91,38 +102,31 @@ const MyComponent = (props) => {
         yRotation: temporaryYRotationValue,
         zRotation: temporaryZRotationValue,
       };
-
-      // Find the index of the selected mesh in the allMeshData array
-      const meshIndex = allMeshData.findIndex(mesh => mesh.meshName === selectedMeshData.meshName);
-
-      // Update the mesh data in the allMeshData array
-      const updatedAllMeshData = [...allMeshData];
-      updatedAllMeshData[meshIndex] = updatedMeshData;
-
-      // Update the context with the new allMeshData
-      setAllMeshData(updatedAllMeshData);
+  
+      setActiveMeshData(updatedMeshData); // Kopyalanan veriyi güncelle
+      allMeshData[globalMeshDataIndex]=activeMeshData;
+      setAllMeshData(allMeshData);
     }
   };
 
-  const handleButtonClick = () => {
-    // Delete logic here
-  };
-  
-
+    
+   
     //React Select Optionsları
     const handleMeshSelectChange = (selectedOption) => {
       const selectedMeshName = selectedOption.value;
     
-      var selectedObject = allMeshData.find(function(obj) {
-        return obj.meshName === selectedMeshName;
-      });
+      const MeshDataIndex = props.selectedFiles.findIndex(item => item.value === selectedMeshName);
       
-      // Nesneyi console'a yazdırma
-      console.log(selectedObject);
+      setglobalMeshDataIndex(MeshDataIndex);
+      const NewactiveMeshData = allMeshData[MeshDataIndex];
+      console.log(NewactiveMeshData);
+      setActiveMeshData(NewactiveMeshData);
     };
     
+    console.log(allMeshData[1]);
+    console.log(activeMeshData);
+    console.log(globalMeshDataIndex);
     console.log(allMeshData);
- 
   return (
     <div >
     <div >
@@ -289,6 +293,24 @@ const MyComponent = (props) => {
       >
         Update
       </button>
+      
+    </div>
+  );
+};
+
+export default MyComponent;
+ 
+
+
+
+
+
+/* 
+    
+    
+      const handleButtonClick = () => {
+        // Delete logic here
+      };
       <button
         onClick={handleButtonClick}
         style={{ backgroundColor: 'red' }}
@@ -308,8 +330,5 @@ const MyComponent = (props) => {
           />
         </svg>
       </button>
-    </div>
-  );
-};
-
-export default MyComponent;
+    
+    */

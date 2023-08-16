@@ -14,7 +14,7 @@ import {useControls} from 'leva'
 //My Context
 import { MeshProvider } from "./Services/MeshContext";
 import { usePositionContext } from "./Services/PositionContext";
-import { MeshContext } from "./Services/MeshContext";
+import { useAllMeshDataContext } from "./Services/AllMeshDataContext";
 
 
 
@@ -50,7 +50,10 @@ export default function App() {
   const [isAnimationRunning, setAnimationRunning] = useState(false); // Animasyon durumu
   const meshid = useState(0);
  
-
+  //MeshValues
+  const [renderMeshData,setrenderMeshData] = useState();
+  //Context Values
+  const { allMeshData, setAllMeshData } = useAllMeshDataContext();
 
   const { gridSize, ...gridConfig } = useControls({
     gridSize: [10.5, 10.5],
@@ -90,7 +93,13 @@ export default function App() {
   const handleStopAnimation = () => {
     setAnimationRunning(false);
   };
-  
+  const newallmeshdata={};
+  for (const key in allMeshData){
+    if (key !== 'selectedFiles'){
+      newallmeshdata[key]=allMeshData[key];
+    }
+  }
+  console.log(newallmeshdata);
   return (
     <div className="d-flex" style={{ height: "100%" }}>
       <MeshProvider>
