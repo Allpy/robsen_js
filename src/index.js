@@ -3,19 +3,19 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-
- 
+import { PositionProvider } from './Services/PositionContext';
+import { AllMeshDataProvider } from './Services/AllMeshDataContext';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
+  <AllMeshDataProvider>
+  <PositionProvider>
   <React.StrictMode>
-    
-    
     <App />
-    
-    
   </React.StrictMode>
+  </PositionProvider>
+  </AllMeshDataProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function

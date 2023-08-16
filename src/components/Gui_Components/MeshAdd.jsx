@@ -1,61 +1,95 @@
-import axios from 'axios';
-import React, { Component } from 'react';
-class MeshAdd extends Component {
-  state = {
-    selectedFile: null,
+import React, { useState, useEffect, useRef, useContext } from "react";
+import Select from "react-select";
+import axios from "axios";
+import { useAllMeshDataContext } from "../../Services/AllMeshDataContext";
+import DefaultMesh from "./DefaultMesh";
+
+const MeshAdd = ({ sendData, receivedTableData }) => {
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const { allMeshData, setAllMeshData } = useAllMeshDataContext();
+  const [fileOptions, setFileOptions] = useState([]);
+  const [addClicked, setAddClicked] = useState(false);
+  const [isFileSelected, setIsFileSelected] = useState(false);
+  const idCounter = useRef(0);
+
+  useEffect(() => {
+    axios
+      .get("/Models")
+      .then((response) => {
+        const options = response.data.map((fileName) => ({
+          value: fileName,
+          label: fileName,
+        }));
+        setFileOptions(options);
+      })
+      .catch((error) => {
+        console.error("An error occurred while fetching file names:", error);
+      });
+  }, []);
+
+  useEffect(() => {
+    const meshDataArray = selectedFiles.map((file) => {
+      const meshData = {
+        id: idCounter.current,
+        meshName: file.label,
+        x: 0,
+        y: 0,
+        z: 0,
+        xRotation: 0,
+        yRotation: 0,
+        zRotation: 0,
+      };
+      idCounter.current++;
+      return meshData;
+    });
+
+    setAllMeshData(meshDataArray);
+  }, [selectedFiles, setAllMeshData]);
+
+  useEffect(() => {
+    // Update allMeshData with selectedFiles here
+    setAllMeshData((prevAllMeshData) => ({
+      ...prevAllMeshData,
+      selectedFiles,
+    }));
+  }, [selectedFiles, setAllMeshData]);
+
+  const handleFileSelect = (selectedOption) => {
+    setSelectedFiles(selectedOption);
+    setSelectedIndex(selectedOption.length);
+    setIsFileSelected(true);
   };
 
-  onFileChange = (event) => {
-    this.setState({ selectedFile: event.target.files[0] });
-  };
-
-  onFileUpload = () => {
-    const formData = new FormData();
-    formData.append(
-      'myFile',
-      this.state.selectedFile,
-      this.state.selectedFile.name
-    );
-
-    console.log(this.state.selectedFile);
-    axios.post('api/uploadfile', formData);  //I need to change this line
-  };
-
-  fileData = () => {
-    if (this.state.selectedFile) {
-      return (
-        <div>
-          <h2>File Details:</h2>
-          <p>File Name: {this.state.selectedFile.name}</p>
-          <p>File Type: {this.state.selectedFile.type}</p>
-          <p>
-            Last Modified:{' '}
-            {this.state.selectedFile.lastModifiedDate.toDateString()}
-          </p>
-        </div>
-      );
-    } else {
-      return (
-        <div>
-          <br />
-          <h4>Choose before Pressing the Upload button</h4>
-        </div>
-      );
+  const handleAddClick = () => {
+    if (isFileSelected) {
+      sendData(selectedFiles);
+      setAddClicked(true);
     }
   };
 
-  render() {
-    return (
-      <div>
-        <h1>Plese select the translation file</h1>
-        <div>
-          <input type="file" onChange={this.onFileChange} />
-          <button onClick={this.onFileUpload}>Upload!</button>
-        </div>
-        {this.fileData()}
+  return (
+    <div className="container">
+      <div className="row">
+        <h2 className="text-light">Dosya Listesi:</h2>
+        <Select
+          className="py-3"
+          isMulti
+          options={fileOptions}
+          value={selectedFiles}
+          onChange={handleFileSelect}
+        />
+        <p>Seçilen Dosya Sayısı: {selectedIndex}</p>
+        <button className="btn btn-primary" onClick={handleAddClick}>
+          Add
+        </button>
       </div>
-    );
-  }
-}
+      <hr />
+      <div className="row">
+        <DefaultMesh selectedFiles={selectedFiles}/>
+      </div>
+    </div>
+  );
+};
 
 export default MeshAdd;
